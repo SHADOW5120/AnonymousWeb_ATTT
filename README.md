@@ -85,10 +85,10 @@ export const API_URL = 'http://localhost:5000';
 
 ## Usage
 
-1. Ensure the **Tor** service is running:
+1. Ensure the **Tor** service is running by going to CMD in **Tor** folder:
 
 ```bash
-sudo service tor start
+tor.exe
 ```
 
 2. Start the backend and frontend as described in the installation steps.
