@@ -37,15 +37,15 @@ Ensure you have the following installed on your system:
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/anonymous-web.git
-cd anonymous-web
+git clone https://github.com/SHADOW5120/AnonymousWeb_ATTT.git
+cd AnonymousWeb_ATTT
 ```
 
 2. Set up and run the backend:
 
 ```bash
 cd tor-nodejs
-npm install
+npm install axios express cors tor-control socks-proxy-agent
 node torRequest.js
 ```
 
@@ -53,7 +53,7 @@ node torRequest.js
 
 ```bash
 cd tor-reactjs
-npm install
+npm install axios
 npm start
 ```
 
@@ -63,7 +63,7 @@ Ensure that the Tor service is running on port **9050** (default SOCKS5 proxy po
 
 ### Backend Configuration
 
-Edit `backend/server.js` to modify any environment-specific variables:
+Edit `tor-nodejs/torRequest.js` to modify any environment-specific variables:
 
 ```javascript
 const torControl = new TorControl({
@@ -77,7 +77,7 @@ const torProxy = new SocksProxyAgent('socks5h://127.0.0.1:9050');
 
 ### Frontend Configuration
 
-Edit `frontend/src/config.js` to point to the correct backend:
+Edit `tor-reactjs/src/App.js` to point to the correct backend:
 
 ```javascript
 export const API_URL = 'http://localhost:5000';
@@ -96,7 +96,7 @@ sudo service tor start
 3. Open your browser and navigate to:
 
 ```
-http://localhost:3000
+http://localhost:5000
 ```
 
 4. Use the search functionality to anonymously query the web.
