@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
@@ -7,29 +7,25 @@ function App() {
   const [proxyUrl, setProxyUrl] = useState('');
   const [ip, setIp] = useState('');
   const [loading, setLoading] = useState(false);
+  const [proxyType, setProxyType] = useState('socks5');
 
-  // Lấy IP hiện tại qua Tor
   const fetchIP = async () => {
     try {
       const response = await axios.get('http://localhost:5000/my-ip');
       setIp(response.data.ip);
-    } catch (error) {
+    } catch {
       setIp('Không thể lấy IP');
     }
   };
 
-  // Gửi yêu cầu proxy và đổi IP
-  const fetchViaTor = async () => {
+  const fetchViaProxy = async () => {
     if (!url) return alert('Hãy nhập URL!');
     setLoading(true);
     setProxyUrl('');
 
     try {
-      // Tạo URL proxy thông qua backend
-      const proxyLink = `http://localhost:5000/proxy?url=${encodeURIComponent(url)}`;
+      const proxyLink = `http://localhost:5000/proxy?url=${encodeURIComponent(url)}&type=${proxyType}`;
       setProxyUrl(proxyLink);
-
-      // Cập nhật IP mới sau mỗi lần truy cập
       await fetchIP();
     } catch (error) {
       alert(`❌ Lỗi: ${error.message}`);
@@ -38,27 +34,38 @@ function App() {
     }
   };
 
+  useEffect(() => {
+    fetchIP();
+    const interval = setInterval(() => {
+      axios.post('http://localhost:5000/reset-session')
+        .then(() => console.log('🔄 Reset phiên duyệt.'))
+        .catch(err => console.error('❌ Lỗi reset phiên:', err));
+    }, 10 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="App">
       <h1>🌐 Trình duyệt ẩn danh (Tor Proxy)</h1>
 
-      {/* Nhập URL */}
       <input
         type="text"
-        placeholder="Nhập URL (vd: https://check.torproject.org)"
+        placeholder="Nhập URL (https://check.torproject.org)"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
       />
 
-      {/* Nút Truy cập */}
-      <button onClick={fetchViaTor} disabled={loading}>
+      <select onChange={(e) => setProxyType(e.target.value)}>
+        <option value="socks5">SOCKS5</option>
+        <option value="https">HTTPS</option>
+      </select>
+
+      <button onClick={fetchViaProxy} disabled={loading}>
         {loading ? '🔄 Đang tải...' : '🚀 Truy cập'}
       </button>
 
-      {/* Hiển thị địa chỉ IP */}
       <p>🔍 IP hiện tại: {ip || 'Đang kiểm tra...'}</p>
 
-      {/* Hiển thị trang web trong iframe */}
       {proxyUrl && (
         <div className="iframe-container">
           <iframe
