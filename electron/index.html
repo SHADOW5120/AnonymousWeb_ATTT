@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anonymous Browser</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        #toolbar { padding: 10px; background: #333; color: white; display: flex; }
+        #url { flex: 1; padding: 5px; margin-right: 10px; }
+        button { padding: 5px 10px; margin-left: 5px; }
+    </style>
+</head>
+<body>
+
+    <div id="toolbar">
+        <input type="text" id="url" placeholder="Nhập URL...">
+        <button onclick="browsePage()">Duyệt Web</button>
+        <button onclick="changeIP()">Đổi IP</button>
+    </div>
+
+    <script>
+        async function browsePage() {
+            const url = document.getElementById("url").value.trim();
+            if (!url) return;
+            window.electronAPI.browseUrl(url);
+        }
+
+        async function changeIP() {
+            const response = await window.electronAPI.newIdentity();
+            alert(response);
+        }
+    </script>
+</body>
+</html>
