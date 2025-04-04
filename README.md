@@ -1,48 +1,77 @@
-# Anonymous Web with Tor
+# Anonymous Web with Tor  
 
-This project is an anonymous web application built using **Node.js** for the backend and **React.js** for the frontend. It operates through the **Tor network** to ensure user privacy, allowing anonymous browsing with features like IP masking, no browsing history storage, and automatic IP rotation after each session.
+This project is an **anonymous web browser** built using **Electron.js** for the frontend and **Node.js** for the backend. It operates through the **Tor network**, allowing users to browse the web privately with features like IP masking, no history storage, and automatic IP rotation.  
 
-## Features
+---
 
-- **Anonymous Browsing**: Browse the web securely and anonymously via the Tor network.
-- **IP Masking**: Automatically changes the IP address through Tor to conceal the user's identity.
-- **No History Storage**: Does not store or log any browsing activity.
-- **Session-based IP Rotation**: Automatically generates a new IP address after each browsing session.
-- **Keyword Search**: Enables anonymous keyword-based searches through DuckDuckGo.
-- **Real-time IP Display**: Displays the current Tor exit node (public IP address).
-- **Automatic Session Reset**: Automatically resets and generates a new identity after a configurable time interval.
+## Features  
 
-## Technology Stack
+✅ **Anonymous Browsing**: Browse the web securely via the Tor network.  
+✅ **IP Masking**: Hides your real IP by routing traffic through Tor.  
+✅ **No History Storage**: No browsing data is saved.  
+✅ **Session-based IP Rotation**: Change IP automatically after each session.  
+✅ **Keyword Search**: Perform anonymous searches via DuckDuckGo.  
+✅ **Real-time IP Display**: Shows the current Tor exit node.  
+✅ **Custom Proxy Setup**: All requests are routed through the Tor SOCKS5 proxy.  
 
-### Backend (Node.js)
-- Express.js (Routing & API handling)
-- Axios (HTTP requests via Tor proxy)
-- Socks Proxy Agent (Tor SOCKS5 proxy integration)
-- Tor Control (IP rotation via Tor ControlPort)
+---
 
-### Frontend (React.js)
-- React Router (Navigation)
-- Axios (API requests)
-- Tailwind CSS (Styling)
+## Technology Stack  
 
-## Prerequisites
+### **Backend (Node.js)**  
+- **Express.js** - API handling  
+- **Tor-Control** - Manage Tor circuits & change IPs  
+- **Socks Proxy Agent** - Routes requests through the Tor proxy  
 
-Ensure you have the following installed on your system:
+### **Frontend (Electron.js)**  
+- **Electron BrowserView** - Displays web content  
+- **IPC Communication** - Handles user interactions  
+- **Tor Proxy Integration** - Ensures anonymity  
 
-- Node.js (>= v18.x.x)
-- npm (>= v9.x.x)
-- Tor (installed and running on your system)
+---
 
-## Installation
+## **Prerequisites**  
 
-1. Clone the repository:
+Make sure you have the following installed:  
+
+- **Node.js** (>= v18.x.x)  
+- **npm** (>= v9.x.x)  
+- **Tor** (installed & running)  
+
+### **Tor Setup**  
+
+1️⃣ Open your `torrc` file and enable control features:  
+
+```
+ControlPort 9051
+HashedControlPassword 16:<hashed-password>
+SOCKSPort 9050
+```
+
+2️⃣ Generate a hashed password for Tor:  
+
+```bash
+tor --hash-password your-password
+```
+
+3️⃣ Add the output to your `torrc` file, then restart Tor:  
+
+```bash
+sudo systemctl restart tor
+```
+
+---
+
+## **Installation**  
+
+Clone the repository and install dependencies:  
 
 ```bash
 git clone https://github.com/SHADOW5120/AnonymousWeb_ATTT.git
 cd AnonymousWeb_ATTT
 ```
 
-2. Set up and run the backend:
+### **Backend Setup**  
 
 ```bash
 cd tor-nodejs
@@ -50,98 +79,100 @@ npm install
 node torRequest.js
 ```
 
-3. Set up and run the frontend:
+### **Frontend Setup**  
 
 ```bash
-cd ../tor-reactjs
+cd ../electron
 npm install
 npm start
 ```
 
-## Configuration
+---
 
-Ensure the Tor service is running on port **9050** (default SOCKS5 proxy port) and ControlPort **9051**.
+## **Configuration**  
 
-### Backend Configuration
+### **Backend (`tor-nodejs/torRequest.js`)**  
 
-Edit `tor-nodejs/torRequest.js` to modify any environment-specific variables:
+Update the **Tor control settings**:  
 
 ```javascript
 const torControl = new TorControl({
-  password: 'your-tor-password', // Set your Tor Control password
+  password: 'your-tor-password',
   host: '127.0.0.1',
   port: 9051,
 });
-
-const torProxy = new SocksProxyAgent('socks5h://127.0.0.1:9050');
 ```
 
-Make sure you have configured the `ControlPort` and `HashedControlPassword` in your `torrc` configuration file. To generate a hashed password:
+Make sure Tor is running on **port 9050 (SOCKS5)** and **9051 (ControlPort)**.
+
+---
+
+## **Usage**  
+
+1️⃣ **Start the Tor service**:  
 
 ```bash
-tor --hash-password your-password
+tor
 ```
 
-Add the output to your `torrc` file:
-
-```
-ControlPort 9051
-HashedControlPassword 16:<hashed-output>
-```
-
-Restart the Tor service after making changes.
-
-### Frontend Configuration
-
-Edit `tor-reactjs/src/App.js` to point to the correct backend:
-
-```javascript
-export const API_URL = 'http://localhost:5000';
-```
-
-## Usage
-
-1. Ensure the **Tor** service is running by going to the Tor installation folder and executing:
+2️⃣ **Run the backend**:  
 
 ```bash
-tor.exe
+cd tor-nodejs
+node torRequest.js
 ```
 
-2. Start the backend and frontend as described in the installation steps.
+3️⃣ **Run the Electron app**:  
 
-3. Open your browser and navigate to:
-
+```bash
+cd electron
+npm start
 ```
-http://localhost:3000
-```
 
-4. Use the provided interface to access the web anonymously and monitor your IP address.
+4️⃣ **Use the browser interface** to access anonymous web browsing.
 
-## Security Considerations
+---
 
-- Ensure the system is behind a secure network and that Tor is up-to-date.
-- Regularly audit the system for vulnerabilities.
-- Avoid exposing your real IP address by only using the Tor-proxied endpoints.
-- Limit access to the Tor ControlPort to prevent unauthorized IP manipulation.
+## **Security Considerations**  
 
-## Troubleshooting
+⚠️ **Never expose your real IP** when browsing sensitive websites.  
+⚠️ **Only use Tor-proxied requests** to avoid leaks.  
+⚠️ **Keep Tor updated** for maximum security.  
+⚠️ **Do not use personal accounts** when browsing anonymously.  
 
-1. **Tor is not running**: Ensure Tor is installed and the `tor.exe` process is active.
+---
 
-2. **IP does not change**: Ensure the Tor ControlPort is configured correctly and the password is properly set.
+## **Troubleshooting**  
 
-3. **CORS Errors**: Ensure the backend is correctly handling cross-origin requests with appropriate `cors` middleware.
+💡 **Tor is not running?**  
+→ Make sure Tor is installed and running on your system.  
 
-## License
+💡 **Cannot change IP?**  
+→ Ensure the **ControlPort password** is correctly configured.  
 
-This project is licensed under the MIT License.
+💡 **CORS errors in the backend?**  
+→ Verify that `cors` middleware is set up properly.  
 
-## Contribution
+---
 
-Feel free to fork this repository and submit pull requests. Ensure all code complies with privacy and security best practices.
+## **License**  
 
-## Acknowledgments
+📜 This project is licensed under the **MIT License**.  
 
-- Tor Project (https://www.torproject.org/)
-- DuckDuckGo for anonymous search services
+---
 
+## **Contributing**  
+
+🚀 Feel free to fork the repo and contribute! Submit a **pull request** if you make improvements.  
+
+---
+
+## **Acknowledgments**  
+
+🔗 **Tor Project** (https://www.torproject.org/)  
+🔗 **Electron.js** (https://www.electronjs.org/)  
+🔗 **DuckDuckGo** (https://duckduckgo.com/)  
+
+---
+
+🔥 **Now you're all set to browse anonymously!** 🚀
