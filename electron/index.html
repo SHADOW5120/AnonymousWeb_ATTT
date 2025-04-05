@@ -9,6 +9,7 @@
         #toolbar { padding: 10px; background: #333; color: white; display: flex; }
         #url { flex: 1; padding: 5px; margin-right: 10px; }
         button { padding: 5px 10px; margin-left: 5px; }
+        #ipDisplay { margin: 20px; font-size: 18px; color: #333; }
     </style>
 </head>
 <body>
@@ -18,6 +19,8 @@
         <button onclick="browsePage()">Duyệt Web</button>
         <button onclick="changeIP()">Đổi IP</button>
     </div>
+
+    <div id="ipDisplay">IP Hiện Tại: Đang tải...</div>
 
     <script>
         async function browsePage() {
@@ -30,6 +33,10 @@
             const response = await window.electronAPI.newIdentity();
             alert(response);
         }
+
+        window.electronAPI.onIPUpdate((event, ip) => {
+            document.getElementById("ipDisplay").textContent = `IP Hiện Tại: ${ip}`;
+        });
     </script>
 </body>
 </html>

@@ -18,33 +18,45 @@ app.whenReady().then(async () => {
 
     mainWindow.loadFile("index.html");
 
-    // Tạo BrowserView để hiển thị trang web
     view = new BrowserView();
     mainWindow.setBrowserView(view);
-    view.setBounds({ x: 0, y: 50, width: 1200, height: 750 });
 
-    // 🔥 Cấu hình Electron sử dụng proxy Tor
+    const [winWidth, winHeight] = mainWindow.getSize();
+    // const sidebarWidth = 250;
+    const topbarHeight = 100;
+
+    view.setBounds({
+        x: 0,
+        y: topbarHeight,
+        width: winWidth,
+        height: winHeight - topbarHeight,
+    });
+
+    view.setAutoResize({
+        width: true,
+        height: true,
+    });
+
+    // Cấu hình proxy Tor
     await session.defaultSession.setProxy({
         proxyRules: "socks5://127.0.0.1:9050",
     });
 
-    // Kiểm tra xem có đang chạy qua Tor không
-    axios.get("http://localhost:5000/check-tor")
-        .then(response => {
-            console.log("Tor IP:", response.data.ip);
-        })
-        .catch(error => {
-            console.error("Lỗi kết nối Tor:", error);
-        });
+    try {
+        const response = await axios.get("http://localhost:5000/check-tor");
+        console.log("Tor IP:", response.data.ip);
+    } catch (error) {
+        console.error("Lỗi kết nối Tor:", error);
+    }
 
-    // Tải trang kiểm tra Tor
+    updateIP();
+
     view.webContents.loadURL("https://check.torproject.org");
 });
 
-// IPC nhận URL từ frontend và duyệt web qua backend
 ipcMain.handle("browse-url", async (event, url) => {
     try {
-        const response = await axios.get(`http://localhost:5000/browse?url=${encodeURIComponent(url)}`);
+        await axios.get(`http://localhost:5000/browse?url=${encodeURIComponent(url)}`);
         view.webContents.loadURL(url);
         return "Đã tải trang qua Tor";
     } catch (error) {
@@ -52,12 +64,22 @@ ipcMain.handle("browse-url", async (event, url) => {
     }
 });
 
-// IPC đổi IP Tor
+async function updateIP() {
+    try {
+        const response = await axios.get("http://localhost:5000/current-ip");
+        mainWindow.webContents.send("update-ip", response.data.ip);
+    } catch (error) {
+        mainWindow.webContents.send("update-ip", "Không xác định");
+    }
+}
+
 ipcMain.handle("new-identity", async () => {
     try {
-        const response = await axios.get("http://localhost:5000/new-identity");
-        return response.data.message;
+        await axios.get("http://localhost:5000/new-identity");
+        updateIP();
+        return "Đã đổi IP!";
     } catch (error) {
         return "Lỗi khi đổi IP!";
     }
 });
+
