@@ -1,3 +1,6 @@
+Dưới đây là file `README.md` được viết lại cho dự án **Anonymous Web with Tor** của bạn:
+
+```markdown
 # Anonymous Web with Tor  
 
 This project is an **anonymous web browser** built using **Electron.js** for the frontend and **Node.js** for the backend. It operates through the **Tor network**, allowing users to browse the web privately with features like IP masking, no history storage, and automatic IP rotation.  
@@ -8,8 +11,8 @@ This project is an **anonymous web browser** built using **Electron.js** for the
 
 ✅ **Anonymous Browsing**: Browse the web securely via the Tor network.  
 ✅ **IP Masking**: Hides your real IP by routing traffic through Tor.  
-✅ **No History Storage**: No browsing data is saved.  
-✅ **Session-based IP Rotation**: Change IP automatically after each session.  
+✅ **No History Storage**: No browsing data is saved, remove all history manually.  
+✅ **Session-based IP Rotation**: Change IP manually by pressing the button.  
 ✅ **Keyword Search**: Perform anonymous searches via DuckDuckGo.  
 ✅ **Real-time IP Display**: Shows the current Tor exit node.  
 ✅ **Custom Proxy Setup**: All requests are routed through the Tor SOCKS5 proxy.  
@@ -172,7 +175,3 @@ npm start
 🔗 **Tor Project** (https://www.torproject.org/)  
 🔗 **Electron.js** (https://www.electronjs.org/)  
 🔗 **DuckDuckGo** (https://duckduckgo.com/)  
-
----
-
-🔥 **Now you're all set to browse anonymously!** 🚀
