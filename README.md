@@ -1,4 +1,3 @@
-```markdown
 # Anonymous Web with Tor  
 
 This project is an **anonymous web browser** built using **Electron.js** for the frontend and **Node.js** for the backend. It operates through the **Tor network**, allowing users to browse the web privately with features like IP masking, no history storage, and automatic IP rotation.  
