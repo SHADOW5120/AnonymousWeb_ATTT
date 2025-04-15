@@ -1,5 +1,3 @@
-Dưới đây là file `README.md` được viết lại cho dự án **Anonymous Web with Tor** của bạn:
-
 ```markdown
 # Anonymous Web with Tor  
 
