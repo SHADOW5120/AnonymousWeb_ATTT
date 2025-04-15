@@ -1,42 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anonymous Browser</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-        #toolbar { padding: 10px; background: #333; color: white; display: flex; }
-        #url { flex: 1; padding: 5px; margin-right: 10px; }
-        button { padding: 5px 10px; margin-left: 5px; }
-        #ipDisplay { margin: 20px; font-size: 18px; color: #333; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Anonymous Browser T1</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 0;
+    }
+    #toolbar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      background: #222;
+      padding: 10px;
+      color: white;
+    }
+    #url {
+      flex: 1;
+      padding: 8px;
+      font-size: 16px;
+      margin-right: 10px;
+      border-radius: 4px;
+      border: none;
+    }
+    button {
+      padding: 8px 12px;
+      font-size: 14px;
+      margin: 4px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #555;
+    }
+    #ipDisplay {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #e8e8e8;
+      color: #333;
+    }
+    #dataOutput {
+      padding: 20px;
+    }
+    .section {
+      margin-bottom: 20px;
+    }
+    h3 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  </style>
 </head>
 <body>
 
-    <div id="toolbar">
-        <input type="text" id="url" placeholder="Nhập URL...">
-        <button onclick="browsePage()">Duyệt Web</button>
-        <button onclick="changeIP()">Đổi IP</button>
-    </div>
+  <div id="toolbar">
+    <input type="text" id="url" placeholder="Nhập URL hoặc từ khóa tìm kiếm..."/>
+    <button onclick="browsePage()">🔍 Tìm kiếm</button>
+    <button onclick="changeIP()">🔄 Đổi IP</button>
+    <button onclick="checkStorage()">🗂 Kiểm Tra Lưu Trữ</button>
+    <button onclick="clearStorage()">🧹 Xóa Lưu Trữ</button>
+  </div>
 
-    <div id="ipDisplay">IP Hiện Tại: Đang tải...</div>
+  <div id="ipDisplay">IP hiện tại: Đang tải...</div>
 
-    <script>
-        async function browsePage() {
-            const url = document.getElementById("url").value.trim();
-            if (!url) return;
-            window.electronAPI.browseUrl(url);
+  <div id="dataOutput"></div>
+
+  <script>
+    function isValidURL(str) {
+      try {
+        new URL(str);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    function browsePage() {
+      let url = document.getElementById("url").value.trim();
+      if (!url) return;
+
+      if (!isValidURL(url)) {
+        url = `https://duckduckgo.com/?q=${encodeURIComponent(url)}`;
+      } else if (!/^https?:\/\//i.test(url)) {
+        url = "http://" + url;
+      }
+
+      window.electronAPI.browseUrl(url);
+    }
+
+    async function changeIP() {
+      const response = await window.electronAPI.newIdentity();
+      alert(response);
+    }
+
+    function openNewTab(title, content) {
+        const newWindow = window.open('', '_blank', 'width=800,height=600');
+        if (newWindow) {
+        newWindow.document.write(`
+            <html>
+            <head>
+                <title>${title}</title>
+                <style>
+                body { font-family: monospace; padding: 20px; background: #fff; }
+                pre { white-space: pre-wrap; word-break: break-word; }
+                </style>
+            </head>
+            <body>
+                <h2>${title}</h2>
+                <pre>${content}</pre>
+            </body>
+            </html>
+        `);
+        newWindow.document.close();
+        } else {
+        alert("Trình duyệt chặn cửa sổ mới. Vui lòng bật popup!");
         }
+    }
 
-        async function changeIP() {
-            const response = await window.electronAPI.newIdentity();
-            alert(response);
-        }
+    async function checkStorage() {
+        const container = document.getElementById("dataOutput");
+        container.innerHTML = "<p>Đang kiểm tra...</p>";
 
-        window.electronAPI.onIPUpdate((event, ip) => {
-            document.getElementById("ipDisplay").textContent = `IP Hiện Tại: ${ip}`;
-        });
-    </script>
+        const data = await window.electronAPI.checkStorage();
+
+        // Hiển thị cookies dưới dạng JSON
+        const cookiesJson = data.cookies.length
+        ? JSON.stringify(data.cookies, null, 2)
+        : JSON.stringify({ message: "Không có cookie nào" }, null, 2);
+
+        // Lấy dữ liệu từ localStorage
+        const localStorageData = JSON.stringify(localStorage, null, 2);
+
+        // Lấy dữ liệu từ sessionStorage
+        const sessionStorageData = JSON.stringify(sessionStorage, null, 2);
+
+        const storageContent = `
+        <div class="section">
+            <h3>🍪 Cookies:</h3>
+            <pre>${cookiesJson}</pre>
+        </div>
+        <div class="section">
+            <h3>📦 LocalStorage:</h3>
+            <pre>${localStorageData}</pre>
+        </div>
+        <div class="section">
+            <h3>📦 SessionStorage:</h3>
+            <pre>${sessionStorageData}</pre>
+        </div>
+        `;
+
+        openNewTab("Thông Tin Lưu Trữ Của Trình Duyệt", storageContent);
+    }
+
+    async function clearStorage() {
+        const result = await window.electronAPI.clearAll();
+
+        // Cũng xóa dữ liệu của giao diện chính (index.html)
+        localStorage.clear();
+        sessionStorage.clear();
+
+        alert(result);
+        checkStorage();
+    }
+    // Nhận IP từ backend
+    window.electronAPI.onIPUpdate((event, ip) => {
+      document.getElementById("ipDisplay").textContent = `IP hiện tại: ${ip}`;
+    });
+  </script>
 </body>
 </html>
