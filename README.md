@@ -13,6 +13,7 @@ This project is an **anonymous web browser** built using **Electron.js** for the
 ✅ **Keyword Search**: Perform anonymous searches via DuckDuckGo.  
 ✅ **Real-time IP Display**: Shows the current Tor exit node.  
 ✅ **Custom Proxy Setup**: All requests are routed through the Tor SOCKS5 proxy.  
+✅ **Adds Blocker**: Block and delelte adds automatically.
 
 ---
 
@@ -40,24 +41,12 @@ Make sure you have the following installed:
 
 ### **Tor Setup**  
 
-1️⃣ Open your `torrc` file and enable control features:  
+Open your `torrc` file and enable control features:  
 
 ```
 ControlPort 9051
 HashedControlPassword 16:<hashed-password>
 SOCKSPort 9050
-```
-
-2️⃣ Generate a hashed password for Tor:  
-
-```bash
-tor --hash-password your-password
-```
-
-3️⃣ Add the output to your `torrc` file, then restart Tor:  
-
-```bash
-sudo systemctl restart tor
 ```
 
 ---
@@ -172,3 +161,4 @@ npm start
 🔗 **Tor Project** (https://www.torproject.org/)  
 🔗 **Electron.js** (https://www.electronjs.org/)  
 🔗 **DuckDuckGo** (https://duckduckgo.com/)  
+🔗 **Nodejs** (https://nodejs.org/)
