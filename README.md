@@ -1,6 +1,6 @@
 # Anonymous Web with Tor  
 
-This project is an **anonymous web browser** built using **Electron.js** for the frontend and **Node.js** for the backend. It operates through the **Tor network**, allowing users to browse the web privately with features like IP masking, no history storage, and automatic IP rotation.  
+This project is an **anonymous web browser** built using **Electron.js** for the frontend and **Node.js** for the backend. It operates through the **Tor network**, allowing users to browse the web privately with features like IP masking, no history storage, and manually IP rotation.  
 
 ---
 
@@ -13,7 +13,7 @@ This project is an **anonymous web browser** built using **Electron.js** for the
 ✅ **Keyword Search**: Perform anonymous searches via DuckDuckGo.  
 ✅ **Real-time IP Display**: Shows the current Tor exit node.  
 ✅ **Custom Proxy Setup**: All requests are routed through the Tor SOCKS5 proxy.  
-✅ **Adds Blocker**: Block and delelte adds automatically.
+✅ **Adds Blocker**: Block and delete adds automatically.
 
 ---
 

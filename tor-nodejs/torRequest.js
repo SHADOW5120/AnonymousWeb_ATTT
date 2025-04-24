@@ -18,13 +18,13 @@ const torProxy = new SocksProxyAgent("socks5h://127.0.0.1:9050");
 const tor = new TorControl({
     host: "127.0.0.1",
     port: 9051,
-    password: "Hung12345", // Nếu Tor có mật khẩu, hãy thiết lập ở đây
+    password: "Hung12345", // Pass được hash trong file torrc
 });
 
-// Kiểm tra kết nối Tor
+// Kiểm tra kết nối Tor trong trang chủ của Tor
 app.get("/check-tor", async (req, res) => {
     try {
-        console.log("🔄 Kiểm tra kết nối với Tor...");
+        console.log("Kiểm tra kết nối với Tor...");
         const response = await axios.get("https://check.torproject.org/api/ip", {
             httpsAgent: torProxy,
         });

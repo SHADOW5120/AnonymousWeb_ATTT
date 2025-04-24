@@ -77,6 +77,7 @@
   <div id="dataOutput"></div>
 
   <script>
+    // Kiểm tra url có đúng không
     function isValidURL(str) {
       try {
         new URL(str);
@@ -86,6 +87,7 @@
       }
     }
 
+    // Duyệt web
     function browsePage() {
       let url = document.getElementById("url").value.trim();
       if (!url) return;
@@ -99,11 +101,13 @@
       window.electronAPI.browseUrl(url);
     }
 
+    // Đổi IP
     async function changeIP() {
       const response = await window.electronAPI.newIdentity();
       alert(response);
     }
 
+    // Mở tab mới
     function openNewTab(title, content) {
         const newWindow = window.open('', '_blank', 'width=800,height=600');
         if (newWindow) {
@@ -128,6 +132,7 @@
         }
     }
 
+    // Kiểm tra lưu trữ
     async function checkStorage() {
         const container = document.getElementById("dataOutput");
         container.innerHTML = "<p>Đang kiểm tra...</p>";
@@ -163,6 +168,7 @@
         openNewTab("Thông Tin Lưu Trữ Của Trình Duyệt", storageContent);
     }
 
+    // Xóa lưu trữ
     async function clearStorage() {
         const result = await window.electronAPI.clearAll();
 

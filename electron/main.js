@@ -4,14 +4,14 @@ const axios = require("axios");
 const { ElectronBlocker } = require("@ghostery/adblocker-electron");
 const fetch = require("cross-fetch");
 
-// Tăng giới hạn listener tránh cảnh báo
+// Tăng giới hạn listener
 require("events").defaultMaxListeners = 50;
 ipcMain.setMaxListeners(50);
 
 let mainWindow;
 let view;
 
-// === TẠO CỬA SỔ CHÍNH VÀ TẢI TRÌNH DUYỆT ẨN DANH ===
+// Tạo cửa sổ chính và trình duyệt ẩn danh
 app.whenReady().then(async () => {
     mainWindow = new BrowserWindow({
         width: 1200,
@@ -45,13 +45,13 @@ app.whenReady().then(async () => {
     // Tải trang Tor kiểm tra
     view.webContents.loadURL("https://check.torproject.org");
 
-    // Gỡ quảng cáo/popups sau khi tải trang
+    // Gỡ quảng cáo và popups sau khi tải trang
     view.webContents.on("did-finish-load", async () => {
         await removeAdsAndPopups();
     });
 });
 
-// === ĐẶT KÍCH THƯỚC VIEW ===
+// Đặt kích thước cho VieW
 function setBrowserViewBounds() {
     const [width, height] = mainWindow.getSize();
     const topbarHeight = 100;
@@ -63,7 +63,7 @@ function setBrowserViewBounds() {
     });
 }
 
-// === GỠ QUẢNG CÁO & POPUPS TRONG DOM ===
+// Gỡ quảng cáo và POPUPS trong DOM
 async function removeAdsAndPopups() {
     try {
         await view.webContents.executeJavaScript(`
@@ -80,7 +80,7 @@ async function removeAdsAndPopups() {
     }
 }
 
-// === CẬP NHẬT IP MỚI ===
+// Cập nhật IP mới
 async function updateIP() {
     try {
         const res = await axios.get("http://localhost:5000/current-ip");
@@ -90,7 +90,7 @@ async function updateIP() {
     }
 }
 
-// === KIỂM TRA IP BAN ĐẦU ===
+// Kiểm tra IP ban đầu
 async function checkInitialIP() {
     try {
         const res = await axios.get("http://localhost:5000/check-tor");
@@ -100,7 +100,7 @@ async function checkInitialIP() {
     }
 }
 
-// === IPC HANDLERS ===
+// IPC HANDLERS
 ipcMain.handle("browse-url", async (_event, url) => {
     try {
         await axios.get(`http://localhost:5000/browse?url=${encodeURIComponent(url)}`);
@@ -111,6 +111,7 @@ ipcMain.handle("browse-url", async (_event, url) => {
     }
 });
 
+// Đổi IP
 ipcMain.handle("new-identity", async () => {
     try {
         await axios.get("http://localhost:5000/new-identity");
@@ -121,10 +122,12 @@ ipcMain.handle("new-identity", async () => {
     }
 });
 
+// Lấy cookies
 ipcMain.handle("get-cookies", async () => {
     return await session.defaultSession.cookies.get({});
 });
 
+// Lấy dữ liệu từ storage
 ipcMain.handle("check-storage", async () => {
     const cookies = await session.defaultSession.cookies.get({});
     return {
@@ -134,6 +137,7 @@ ipcMain.handle("check-storage", async () => {
     };
 });
 
+// Xóa tất cả dữ liệu
 ipcMain.handle("clear-all", async () => {
     const currentSession = session.defaultSession;
 
