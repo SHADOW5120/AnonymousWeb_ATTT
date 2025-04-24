@@ -7,3 +7,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
     checkStorage: () => ipcRenderer.invoke('check-storage'),
     clearAll: () => ipcRenderer.invoke("clear-all"),
 });
+
+// // Giả mạo fingerprint trình duyệt
+// contextBridge.exposeInMainWorld("navigatorSpoof", {
+//     languages: ["en-US", "en"],
+//     platform: "Win32",
+//     plugins: [{}, {}, {}],
+//   });
+  
+//   // Xóa các dấu hiệu Electron
+//   Object.defineProperty(navigator, "webdriver", { get: () => undefined });

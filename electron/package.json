@@ -11,7 +11,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@ghostery/adblocker-electron": "^2.5.1",
+    "@ghostery/adblocker-puppeteer": "^2.5.1",
     "axios": "^1.8.4",
+    "cross-fetch": "^4.1.0",
     "electron": "^35.1.2",
     "path": "^0.12.7"
   }

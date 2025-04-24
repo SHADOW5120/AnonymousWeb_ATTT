@@ -1,11 +1,17 @@
 const { app, BrowserWindow, BrowserView, ipcMain, session } = require("electron");
 const path = require("path");
 const axios = require("axios");
+const { ElectronBlocker } = require("@ghostery/adblocker-electron");
+const fetch = require("cross-fetch");
+
+// Tăng giới hạn listener tránh cảnh báo
+require("events").defaultMaxListeners = 50;
+ipcMain.setMaxListeners(50);
 
 let mainWindow;
 let view;
 
-// ======== TẠO CỬA SỔ CHÍNH & BROWSER VIEW =========
+// === TẠO CỬA SỔ CHÍNH VÀ TẢI TRÌNH DUYỆT ẨN DANH ===
 app.whenReady().then(async () => {
     mainWindow = new BrowserWindow({
         width: 1200,
@@ -19,85 +25,106 @@ app.whenReady().then(async () => {
 
     mainWindow.loadFile("index.html");
 
-    // Khởi tạo BrowserView
+    // Tạo BrowserView
     view = new BrowserView();
     mainWindow.setBrowserView(view);
-
+    view.setAutoResize({ width: true, height: true });
     setBrowserViewBounds();
 
-    view.setAutoResize({ width: true, height: true });
-
-    // Cấu hình proxy qua Tor (SOCKS5)
+    // Proxy Tor
     await session.defaultSession.setProxy({ proxyRules: "socks5://127.0.0.1:9050" });
 
+    // Chặn quảng cáo
+    const blocker = await ElectronBlocker.fromPrebuiltAdsAndTracking(fetch);
+    blocker.enableBlockingInSession(session.defaultSession);
+
     // Kiểm tra IP ban đầu
+    checkInitialIP();
+    updateIP();
+
+    // Tải trang Tor kiểm tra
+    view.webContents.loadURL("https://check.torproject.org");
+
+    // Gỡ quảng cáo/popups sau khi tải trang
+    view.webContents.on("did-finish-load", async () => {
+        await removeAdsAndPopups();
+    });
+});
+
+// === ĐẶT KÍCH THƯỚC VIEW ===
+function setBrowserViewBounds() {
+    const [width, height] = mainWindow.getSize();
+    const topbarHeight = 100;
+    view.setBounds({
+        x: 0,
+        y: topbarHeight,
+        width,
+        height: height - topbarHeight,
+    });
+}
+
+// === GỠ QUẢNG CÁO & POPUPS TRONG DOM ===
+async function removeAdsAndPopups() {
+    try {
+        await view.webContents.executeJavaScript(`
+            const removeAds = () => {
+                document.querySelectorAll("iframe, .adsbygoogle, .ad-banner, [id^='ad'], [class*='ads'], .popup, .banner, .advertisement, .ad-container, .ad-wrapper, [data-ad]").forEach(el => el.remove());
+                window.open = () => null;
+                console.log("Đã gỡ quảng cáo DOM!");
+            };
+            removeAds();
+            setInterval(removeAds, 1000);
+        `);
+    } catch (error) {
+        console.error("Nothing here happened!", error.message);
+    }
+}
+
+// === CẬP NHẬT IP MỚI ===
+async function updateIP() {
+    try {
+        const res = await axios.get("http://localhost:5000/current-ip");
+        mainWindow.webContents.send("update-ip", res.data.ip);
+    } catch (err) {
+        mainWindow.webContents.send("update-ip", "Non identified");
+    }
+}
+
+// === KIỂM TRA IP BAN ĐẦU ===
+async function checkInitialIP() {
     try {
         const res = await axios.get("http://localhost:5000/check-tor");
         console.log("Tor IP:", res.data.ip);
     } catch (err) {
         console.error("Không thể kết nối đến dịch vụ Tor:", err.message);
     }
-
-    updateIP();
-
-    // Tải trang kiểm tra Tor
-    view.webContents.loadURL("https://check.torproject.org");
-});
-
-// ======== ĐẶT KÍCH THƯỚC CHO VIEW =========
-function setBrowserViewBounds() {
-    const [winWidth, winHeight] = mainWindow.getSize();
-    const topbarHeight = 100;
-
-    view.setBounds({
-        x: 0,
-        y: topbarHeight,
-        width: winWidth,
-        height: winHeight - topbarHeight,
-    });
 }
 
-// ======== CẬP NHẬT IP HIỆN TẠI TỪ BACKEND =========
-async function updateIP() {
-    try {
-        const res = await axios.get("http://localhost:5000/current-ip");
-        mainWindow.webContents.send("update-ip", res.data.ip);
-    } catch (err) {
-        mainWindow.webContents.send("update-ip", "Không xác định");
-    }
-}
-
-// ======== IPC HANDLERS =========
-
-// Tải URL qua Tor
+// === IPC HANDLERS ===
 ipcMain.handle("browse-url", async (_event, url) => {
     try {
         await axios.get(`http://localhost:5000/browse?url=${encodeURIComponent(url)}`);
         view.webContents.loadURL(url);
         return "Đã tải trang qua Tor";
-    } catch (err) {
+    } catch {
         return "Lỗi khi tải trang!";
     }
 });
 
-// Đổi IP (New Identity)
 ipcMain.handle("new-identity", async () => {
     try {
         await axios.get("http://localhost:5000/new-identity");
         updateIP();
         return "Đã yêu cầu đổi IP thành công!";
-    } catch (err) {
+    } catch {
         return "Không thể đổi IP!";
     }
 });
 
-// Trả về danh sách cookie hiện tại
 ipcMain.handle("get-cookies", async () => {
-    const cookies = await session.defaultSession.cookies.get({});
-    return cookies;
+    return await session.defaultSession.cookies.get({});
 });
 
-// Kiểm tra lưu trữ cục bộ
 ipcMain.handle("check-storage", async () => {
     const cookies = await session.defaultSession.cookies.get({});
     return {
@@ -110,11 +137,9 @@ ipcMain.handle("check-storage", async () => {
 ipcMain.handle("clear-all", async () => {
     const currentSession = session.defaultSession;
 
-    // 1. Xóa toàn bộ dữ liệu: cookies, cache, local storage, v.v.
-    await currentSession.clearStorageData(); 
+    await currentSession.clearStorageData();
 
-    // 2. Dọn localStorage & sessionStorage của trang hiện tại trong BrowserView
-    if (view && view.webContents) {
+    if (view?.webContents) {
         await view.webContents.executeJavaScript(`
             localStorage.clear();
             sessionStorage.clear();
